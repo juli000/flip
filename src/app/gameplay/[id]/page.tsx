@@ -200,6 +200,8 @@ export default function GameplayPage() {
               </Button>
             </div>
           )}
+
+          <Button onClick={handleSomeAction}>Update Game</Button>
         </Card>
       </div>
     </div>

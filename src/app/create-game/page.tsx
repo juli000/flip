@@ -28,10 +28,46 @@ const CreateGamePage = () => {
     }
   };
 
+  // Handle input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setGameData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   // Example form usage
   return (
     <form onSubmit={handleSubmit}>
-      {/* form fields here */}
+      <input
+        type="text"
+        name="gameType"
+        value={gameData.gameType}
+        onChange={handleChange}
+        placeholder="Game Type"
+      />
+      <input
+        type="number"
+        name="keys"
+        value={gameData.keys}
+        onChange={handleChange}
+        placeholder="Number of Keys"
+      />
+      <input
+        type="text"
+        name="keyType"
+        value={gameData.keyType}
+        onChange={handleChange}
+        placeholder="Key Type"
+      />
+      <input
+        type="text"
+        name="username"
+        value={gameData.username}
+        onChange={handleChange}
+        placeholder="Username"
+      />
       <button type="submit">Create Game</button>
     </form>
   );
