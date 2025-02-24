@@ -70,6 +70,19 @@ export default function GameplayPage() {
     router.push(`/confirmation?gameId=${game?.id}`);
   };
 
+  // Call updateGames after modifying game data
+  const handleSomeAction = async () => {
+    if (!game) return; // Ensure game is defined
+
+    // Create updatedGames based on your logic
+    const updatedGames = {
+      ...game,
+      // Add any modifications you need here
+    };
+
+    await updateGames([updatedGames]); // Pass it as an array
+  };
+
   if (!game) {
     return (
       <div className="min-h-screen bg-gray-950 text-white p-6 flex items-center justify-center">

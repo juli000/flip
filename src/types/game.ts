@@ -1,5 +1,5 @@
 export interface Game {
-  id: string;
+  id?: string;
   gameType: string;
   keys: number;
   keyType: string;
