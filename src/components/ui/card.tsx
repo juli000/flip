@@ -3,14 +3,22 @@ import { cn } from "@/lib/utils";
 import { HTMLAttributes } from "react";
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  // Add any specific props you need
+  variant?: 'default' | 'elevated' | 'bordered';
+  padding?: 'none' | 'default' | 'large';
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, ...props }, ref) => (
+  ({ className, variant = 'default', padding = 'default', ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("rounded-lg", className)}
+      className={cn(
+        "rounded-lg",
+        variant === 'elevated' && "shadow-lg",
+        variant === 'bordered' && "border",
+        padding === 'default' && "p-4",
+        padding === 'large' && "p-6",
+        className
+      )}
       {...props}
     />
   )

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 
 interface Game {
   id: string;
@@ -21,7 +20,6 @@ interface Game {
 const ADMIN_PASSWORD = "bruh"; // In production, this should be in environment variables
 
 export default function AdminPage() {
-  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [games, setGames] = useState<Game[]>([]);
