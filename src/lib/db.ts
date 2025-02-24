@@ -7,7 +7,9 @@ const supabase = createClient(
 )
 
 export async function getGames(): Promise<Game[]> {
-  const { data } = await supabase.from('games').select('*')
+  const { data, error } = await supabase.from('games').select('*')
+  if (error) throw new Error(error.message)
+  console.log('Fetched games:', data)
   return data || []
 }
 
