@@ -11,6 +11,7 @@ const GamesPage = () => {
     const fetchGames = async () => {
       try {
         const fetchedGames = await getGames();
+        console.log('Fetched games:', fetchedGames);
         setGames(fetchedGames);
       } catch (error) {
         console.error('Error fetching games:', error);
