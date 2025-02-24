@@ -1,12 +1,12 @@
 export interface Game {
-  id?: string;
-  gameType: string;
+  id: string;
+  game_type: string;
   keys: number;
-  keyType: string;
-  createdAt: Date;
+  key_type: string;
+  created_at: string;
   username: string;
-  participants?: string[];
-  paidParticipants?: string[];
-  gameStartTime?: number;
-  confirmedPayments?: string[];
+  participants: string[];
+  paid_participants: string[];
+  game_start_time: string;
+  confirmed_payments: string[];
 } 

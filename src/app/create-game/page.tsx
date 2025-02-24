@@ -6,16 +6,16 @@ import { useState } from 'react';
 
 const CreateGamePage = () => {
   const [gameData, setGameData] = useState<Game>({
-    id: undefined, // This is now valid since id is optional
-    gameType: '',
+    id: '', // Change this to an empty string or a valid UUID
+    game_type: '',
     keys: 0,
-    keyType: '',
+    key_type: '',
     username: '',
-    createdAt: new Date(), // Set to current date
+    created_at: new Date().toISOString(), // Set to current date in ISO format
     participants: [], // Initialize if needed
-    paidParticipants: [], // Initialize if needed
-    gameStartTime: undefined, // Initialize if needed
-    confirmedPayments: [], // Initialize if needed
+    paid_participants: [], // Initialize if needed
+    game_start_time: '',
+    confirmed_payments: [], // Initialize if needed
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,8 +42,8 @@ const CreateGamePage = () => {
     <form onSubmit={handleSubmit}>
       <input
         type="text"
-        name="gameType"
-        value={gameData.gameType}
+        name="game_type"
+        value={gameData.game_type}
         onChange={handleChange}
         placeholder="Game Type"
       />
@@ -56,8 +56,8 @@ const CreateGamePage = () => {
       />
       <input
         type="text"
-        name="keyType"
-        value={gameData.keyType}
+        name="key_type"
+        value={gameData.key_type}
         onChange={handleChange}
         placeholder="Key Type"
       />

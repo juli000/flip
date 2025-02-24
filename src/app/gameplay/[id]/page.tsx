@@ -5,37 +5,66 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { getGame, updateGames } from '@/lib/db';
+import { getGame, updateGames, getGames } from '@/lib/db';
 import { Game } from '@/types/game';
 
 export default function GameplayPage() {
   const params = useParams();
   const router = useRouter();
-  const [game, setGame] = useState<Game | null>(null);
+  const gameId = Array.isArray(params.id) ? params.id[0] : params.id || '';
+  const [game, setGame] = useState<Game>({
+    id: '', // Provide a default value
+    game_type: '',
+    keys: 0,
+    key_type: '',
+    created_at: '', // Ensure this is a string
+    username: '',
+    participants: [],
+    paid_participants: [],
+    game_start_time: '',
+    confirmed_payments: [],
+  });
   const [countdown, setCountdown] = useState<number | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [games, setGames] = useState<Game[]>([]);
+
+  const isValidUUID = (id: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  };
 
   useEffect(() => {
     const fetchGame = async () => {
-      if (!params.id) return;
-      const gameData = await getGame(params.id);
+      const testId = '0c8b8d43-9c89-466c-8ceb-1bc81e7c62fa'; // Use the provided UUID for testing
+      console.log('Fetching game with ID:', testId);
+      const gameData = await getGame(testId);
       if (gameData) setGame(gameData);
     };
     fetchGame();
 
-    // Poll for updates
     const interval = setInterval(fetchGame, 1000);
     return () => clearInterval(interval);
-  }, [params.id]);
+  }, []);
 
   useEffect(() => {
     const checkForUpdates = () => {
       const storedGames = JSON.parse(localStorage.getItem('games') || '[]');
-      const currentGame = storedGames.find((g: Game) => g.id === params.id);
-      setGame(currentGame || null);
+      const currentGame = storedGames.find((g: Game) => g.id === gameId);
+      setGame(currentGame || {
+        id: '', // Provide a default value
+        game_type: '',
+        keys: 0,
+        key_type: '',
+        created_at: '',
+        username: '',
+        participants: [],
+        paid_participants: [],
+        game_start_time: '',
+        confirmed_payments: [],
+      });
 
       // Start countdown when both payments are confirmed and game hasn't started
-      if (currentGame?.confirmedPayments?.length === 2 && !hasStarted) {
+      if (currentGame?.confirmed_payments?.length === 2 && !hasStarted) {
         setCountdown(30);
         setHasStarted(true);
       }
@@ -44,7 +73,7 @@ export default function GameplayPage() {
     checkForUpdates();
     const interval = setInterval(checkForUpdates, 1000);
     return () => clearInterval(interval);
-  }, [params.id, hasStarted]);
+  }, [gameId, hasStarted]); // Use gameId consistently
 
   // Separate effect for countdown
   useEffect(() => {
@@ -56,7 +85,7 @@ export default function GameplayPage() {
       }, 1000);
     } else if (countdown === 0) {
       const storedGames = JSON.parse(localStorage.getItem('games') || '[]');
-      const updatedGames = storedGames.filter((g: Game) => g.id !== params.id);
+      const updatedGames = storedGames.filter((g: Game) => g.id !== gameId);
       localStorage.setItem('games', JSON.stringify(updatedGames));
       router.push('/');
     }
@@ -64,7 +93,19 @@ export default function GameplayPage() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [countdown, params.id, router]);
+  }, [countdown, gameId, router]);
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      const games = await getGames(); // Fetch all games directly
+      setGames(games); // Set the games state directly
+    };
+
+    fetchGames(); // Initial fetch
+    const interval = setInterval(fetchGames, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
 
   const handleJoinGame = () => {
     router.push(`/confirmation?gameId=${game?.id}`);
@@ -83,22 +124,12 @@ export default function GameplayPage() {
     await updateGames([updatedGames]); // Pass it as an array
   };
 
-  if (!game) {
-    return (
-      <div className="min-h-screen bg-gray-950 text-white p-6 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Game not found</h1>
-          <Link href="/">
-            <Button className="bg-white text-black hover:bg-gray-200">
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
+  if (!game || !game.game_type) {
+    return <div>Loading game...</div>; // Or handle the loading state appropriately
   }
 
-  const isPaymentConfirmed = game.confirmedPayments?.includes(game.username);
+  const isPaymentConfirmed = Array.isArray(game.confirmed_payments) && 
+                            game.confirmed_payments.includes(game.username);
   const isGameFull = game.participants && game.participants.length >= 2;
 
   return (
@@ -106,7 +137,7 @@ export default function GameplayPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">
-            {game.gameType.charAt(0).toUpperCase() + game.gameType.slice(1)} Game
+            {game.game_type.charAt(0).toUpperCase() + game.game_type.slice(1)} Game
           </h1>
           <Button className="bg-zinc-700 hover:bg-zinc-600">Exit Game</Button>
         </div>
@@ -116,7 +147,7 @@ export default function GameplayPage() {
             <h2 className="text-xl font-semibold mb-2">
               {!isPaymentConfirmed 
                 ? 'Waiting for payment verification...'
-                : game.confirmedPayments?.length === 2 
+                : game.confirmed_payments?.length === 2 
                   ? 'Game Starting...' 
                   : game.participants?.length === 2 
                     ? 'Waiting for opponent payment confirmation...'
@@ -132,11 +163,11 @@ export default function GameplayPage() {
                 Created by <span className="text-white">{game.username}</span>
               </p>
               <p className="text-gray-400">
-                {game.keys} {game.keyType === 'skull' ? 'Skull Keys' : 'Gold Keys'} at stake
+                {game.keys} {game.key_type === 'skull' ? 'Skull Keys' : 'Gold Keys'} at stake
               </p>
               <p className="text-sm text-gray-500">
-                Created on {new Date(game.createdAt).toLocaleDateString()} at{' '}
-                {new Date(game.createdAt).toLocaleTimeString()}
+                Created on {new Date(game.created_at).toLocaleDateString()} at{' '}
+                {new Date(game.created_at).toLocaleTimeString()}
               </p>
             </div>
           </div>
@@ -149,7 +180,7 @@ export default function GameplayPage() {
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>{game.username} (Host)</span>
                 </div>
-                {game.confirmedPayments?.includes(game.username) ? (
+                {game.confirmed_payments?.includes(game.username) ? (
                   <span className="text-green-500 text-sm">Payment Confirmed ✓</span>
                 ) : (
                   <span className="text-yellow-500 text-sm">Awaiting Confirmation</span>
@@ -161,7 +192,7 @@ export default function GameplayPage() {
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span>{game.participants[game.participants.length - 1]}</span>
                   </div>
-                  {game.confirmedPayments?.includes(game.participants[game.participants.length - 1]) ? (
+                  {game.confirmed_payments?.includes(game.participants[game.participants.length - 1]) ? (
                     <span className="text-green-500 text-sm">Payment Confirmed ✓</span>
                   ) : (
                     <span className="text-yellow-500 text-sm">Awaiting Confirmation</span>
