@@ -19,33 +19,6 @@ interface Game {
   confirmedPayments?: string[];
 }
 
-const exampleGames = [
-  {
-    id: '1',
-    gameType: 'dice',
-    keys: 5,
-    keyType: 'gold',
-    createdAt: new Date(),
-    username: 'Player1'
-  },
-  {
-    id: '2',
-    gameType: 'coinflip',
-    keys: 10,
-    keyType: 'skull',
-    createdAt: new Date(),
-    username: 'Player2'
-  },
-  {
-    id: '3',
-    gameType: 'roulette',
-    keys: 15,
-    keyType: 'gold',
-    createdAt: new Date(),
-    username: 'Player3'
-  },
-];
-
 export default function GameplayPage() {
   const params = useParams();
   const router = useRouter();
