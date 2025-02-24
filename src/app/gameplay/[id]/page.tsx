@@ -5,19 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-
-interface Game {
-  id: string;
-  gameType: string;
-  keys: number;
-  keyType: string;
-  createdAt: Date;
-  username: string;
-  participants?: string[];
-  paidParticipants?: string[];
-  gameStartTime?: number;
-  confirmedPayments?: string[];
-}
+import { getGame, updateGames } from '@/lib/db';
+import { Game } from '@/types/game';
 
 export default function GameplayPage() {
   const params = useParams();
@@ -25,6 +14,19 @@ export default function GameplayPage() {
   const [game, setGame] = useState<Game | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    const fetchGame = async () => {
+      if (!params.id) return;
+      const gameData = await getGame(params.id);
+      if (gameData) setGame(gameData);
+    };
+    fetchGame();
+
+    // Poll for updates
+    const interval = setInterval(fetchGame, 1000);
+    return () => clearInterval(interval);
+  }, [params.id]);
 
   useEffect(() => {
     const checkForUpdates = () => {
