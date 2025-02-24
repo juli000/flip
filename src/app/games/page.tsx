@@ -28,7 +28,7 @@ const GamesPage = () => {
       ) : (
         <ul>
           {games.map(game => (
-            <li key={game.id}>{game.game_type} - {game.keys} {game.key_type}</li>
+            <li key={game.id}>{game.gameType} - {game.keys} {game.keyType}</li>
           ))}
         </ul>
       )}
