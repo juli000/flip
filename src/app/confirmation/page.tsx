@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ function calculateTax(keys: number, keyType: string) {
   return { goldKeys: 0, purpleGems: 0 };
 }
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const gameId = searchParams.get('gameId');
@@ -276,5 +276,21 @@ export default function ConfirmationPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">
+        <Card className="bg-zinc-900 p-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+          </div>
+        </Card>
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
   );
 } 
